@@ -1,0 +1,279 @@
+{
+  "analysis_completed": [],
+  "analysis_evidence": [],
+  "evidence": [
+    {
+      "artifact": null,
+      "call_id": "call_177475",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 3343,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_31558",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 1560,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_27532",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 388,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_9286",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 536,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_246416",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 1107,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_71133",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 1334,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_296132",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 290,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_114635",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 876,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_323295",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 643,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_100346",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 538,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_9850",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 1376,
+      "venue": null
+    },
+    {
+      "artifact": null,
+      "call_id": "call_223058",
+      "currency": null,
+      "currency_conversion": null,
+      "field": "bytes_written",
+      "scope": null,
+      "source": "write_file",
+      "status": "observed",
+      "symbol": null,
+      "timestamp": null,
+      "tool": "write_file",
+      "value": 8566,
+      "venue": null
+    }
+  ],
+  "identity": {
+    "authorized_symbols": [],
+    "records": [],
+    "recovery": {
+      "max_price_evidence_attempts": 3,
+      "max_rounds": 6,
+      "max_symbol_resolution_attempts": 2,
+      "price_evidence_attempts": 0,
+      "rounds": 0,
+      "symbol_resolution_attempts": 0
+    },
+    "status": "not_required"
+  },
+  "released": null,
+  "schema_version": 1,
+  "session_symbol_roots": [],
+  "session_symbols": [
+    "^A-Z0-9",
+    "^A-ZA-Z0-9"
+  ],
+  "tool_failures": [
+    {
+      "call_id": "call_19545",
+      "error_code": "not_found",
+      "message": "index.html was not found. read_file opens files under the run directory (a relative path such as artifacts/metrics.csv or config.json) and the bundled skill documents (skills/<skill>/...). The engine's source code is not readable here; its contracts and options are documented in the skills: load_skill(name) lists a skill's sections, and load_skill(name, section=...) returns one.",
+      "recorded_at": "2026-11-02T23:41:49.686953Z",
+      "status": "unavailable",
+      "tool": "read_file"
+    }
+  ],
+  "updated_at": "2026-11-02T23:43:13.921832Z",
+  "validations": [
+    {
+      "attempt": 1,
+      "check_findings": [
+        {
+          "issues": [
+            {
+              "claim": "1.5",
+              "code": "numeric_claim_unavailable",
+              "date": null,
+              "field": null,
+              "message": "1.5 is declared observed but this session holds no matching tool evidence to check it against.",
+              "reason": "no_evidence",
+              "role": "observed",
+              "span": [
+                907,
+                910
+              ],
+              "symbol": null,
+              "value": "1.5"
+            }
+          ],
+          "name": "undeclared-figure",
+          "severity": "block"
+        }
+      ],
+      "checked_at": "2026-11-02T23:42:55.940179Z",
+      "content_sha256": "3198c652120da167355db5284e5b67b4c283c2472d8c55e8fa5f8f20675422ce",
+      "figures_block": "",
+      "fired_checks": [
+        "undeclared-figure"
+      ],
+      "issues": [
+        {
+          "claim": "1.5",
+          "code": "numeric_claim_unavailable",
+          "date": null,
+          "field": null,
+          "message": "1.5 is declared observed but this session holds no matching tool evidence to check it against.",
+          "reason": "no_evidence",
+          "role": "observed",
+          "span": [
+            907,
+            910
+          ],
+          "symbol": null,
+          "value": "1.5"
+        }
+      ],
+      "valid": false
+    },
+    {
+      "attempt": 2,
+      "check_findings": [],
+      "checked_at": "2026-11-02T23:43:13.921732Z",
+      "content_sha256": "5d7b7ae030a7a46ff409dab3fd150028fd6b627d1dd8c60b63a7a9ed5ff91eb5",
+      "figures_block": "",
+      "fired_checks": [],
+      "issues": [],
+      "valid": true
+    }
+  ]
+}
