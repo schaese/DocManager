@@ -3,82 +3,304 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com https://generativelanguage.googleapis.com https://accounts.google.com;">
   <title>KI-Dokumentenarchiv</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>KI-Dokumentenarchiv PWA</h1>
-    <nav>
-      <button id="nav-scan">Erfassen</button>
-      <button id="nav-archive">Archiv</button>
-      <button id="nav-tasks">Fristen</button>
-      <button id="nav-settings">Einstellungen</button>
-    </nav>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-icon">📁</span>
+      <h1>KI-Dokumentenarchiv</h1>
+    </div>
+    <div class="header-right">
+      <span id="sync-badge" class="badge">Lokal</span>
+      <button id="header-login-btn" class="btn-outline" type="button">Mit Google anmelden</button>
+    </div>
   </header>
 
   <main id="app-content">
-    <!-- Dynamic views loaded here -->
-    <section id="view-setup" class="view">
-      <h2>Ersteinrichtung (M0/M1)</h2>
-      <p>Bitte geben Sie Ihre Google OAuth Client-ID und den Gemini API-Schlüssel ein.</p>
-      <form id="form-setup">
-        <label>Google OAuth Client-ID: <input type="text" id="cfg-client-id" required></label>
-        <label>Gemini API-Schlüssel: <input type="password" id="cfg-gemini-key" required></label>
-        <button type="submit">Speichern & Anmelden</button>
-      </form>
+    <!-- 1. ARCHIV-ANSICHT (FA-601, FA-603) -->
+    <section id="view-archive" class="view active">
+      <div class="summary-banner" id="archive-summary-banner">
+        <div>
+          <strong id="open-tasks-count">0 offene Aufgaben</strong>
+          <span id="total-docs-count">0 Dokumente im Archiv</span>
+        </div>
+        <button id="btn-sync-drive" class="btn-small" type="button" title="Mit Google Drive abgleichen">↻ Sync</button>
+      </div>
+
+      <div class="search-bar">
+        <input type="search" id="search-input" placeholder="Suche nach Absender, Titel, Volltext, Vertragsnr., Tags...">
+      </div>
+
+      <div class="filter-chips" id="filter-chips">
+        <button class="chip active" data-filter="all" type="button">Alle</button>
+        <button class="chip" data-filter="open" type="button">Offen</button>
+        <button class="chip" data-filter="Rechnung" type="button">Rechnungen</button>
+        <button class="chip" data-filter="Vertrag" type="button">Verträge</button>
+        <button class="chip" data-filter="Bescheid" type="button">Bescheide</button>
+      </div>
+
+      <div class="category-filter-row">
+        <select id="archive-category-filter">
+          <option value="">Alle Kategorien</option>
+        </select>
+      </div>
+
+      <div id="archive-list" class="card-list"></div>
     </section>
 
-    <section id="view-scan" class="view hidden">
-      <h2>Dokument erfassen (M2/M3)</h2>
-      <input type="file" id="file-input" accept="image/*,application/pdf" capture="environment">
-      <div id="preview-container"></div>
-      <button id="btn-analyze" class="hidden">KI-Analyse starten</button>
+    <!-- 2. AUFGABEN & FRISTEN (FA-701 bis FA-704) -->
+    <section id="view-tasks" class="view hidden">
+      <div class="section-header">
+        <h2>Offene Fristen & Aufgaben</h2>
+      </div>
+      <div id="tasks-list" class="card-list"></div>
+    </section>
 
-      <div id="confirmation-card" class="hidden">
-        <h3>Bestätigungskarte (M3)</h3>
-        <form id="form-confirm">
-          <label>Absender: <input type="text" id="meta-sender" required></label>
-          <label>Dokumententyp: 
-            <select id="meta-type">
-              <option value="Rechnung">Rechnung</option>
-              <option value="Vertrag">Vertrag</option>
-              <option value="Bescheid">Bescheid</option>
-              <option value="Sonstiges">Sonstiges</option>
-            </select>
+    <!-- 3. ERFASSUNG / SCANNEN (FA-201 bis FA-206, FA-301 bis FA-402) -->
+    <section id="view-scan" class="view hidden">
+      <h2>Dokument erfassen</h2>
+
+      <div id="drop-zone" class="drop-zone">
+        <p>📷 <strong>Foto aufnehmen</strong> oder PDF/Bild hierher ziehen</p>
+        <small>Max. 10 Seiten · PDF, JPG, PNG (max. 15 MB)</small>
+        <div class="capture-actions">
+          <label class="btn-primary file-label">
+            Kamera / Datei wählen
+            <input type="file" id="file-input" accept="image/*,application/pdf" capture="environment" multiple hidden>
           </label>
-          <label>Datum: <input type="date" id="meta-date" required></label>
-          <label>Betrag (€): <input type="number" step="0.01" id="meta-amount"></label>
-          <label>Fälligkeit: <input type="date" id="meta-due-date"></label>
-          <label>IBAN: <input type="text" id="meta-iban"><span id="iban-validation"></span></label>
-          <label>Zusammenfassung: <textarea id="meta-summary"></textarea></label>
-          <button type="submit">In Google Drive archivieren</button>
+          <button id="btn-manual-entry" class="btn-outline" type="button">Manuell ohne KI erfassen</button>
+        </div>
+      </div>
+
+      <!-- Seiten-Vorschau für Mehrseiten-Scans (FA-201, FA-202) -->
+      <div id="pages-panel" class="hidden">
+        <div class="pages-header">
+          <span id="pages-counter">0 Seiten erfasst</span>
+          <label class="btn-small">
+            + Seite hinzufügen
+            <input type="file" id="add-page-input" accept="image/*" capture="environment" multiple hidden>
+          </label>
+        </div>
+        <div id="pages-list" class="pages-grid"></div>
+        <div class="scan-controls">
+          <button id="btn-start-ai" class="btn-primary" type="button">✨ KI-Analyse starten</button>
+          <button id="btn-clear-pages" class="btn-outline" type="button">Verwerfen</button>
+        </div>
+      </div>
+
+      <!-- Fortschrittsanzeige KI-Analyse (Kapitel 9) -->
+      <div id="analysis-status" class="status-box hidden">
+        <div class="spinner"></div>
+        <p id="analysis-step-text">1/3 Bild wird optimiert...</p>
+      </div>
+
+      <!-- Duplikat-Warnung (FA-206) -->
+      <div id="duplicate-warning" class="warning-box hidden"></div>
+
+      <!-- Bestätigungskarte (FA-401, FA-402) -->
+      <div id="confirm-card" class="confirm-card hidden">
+        <h3>Bestätigungskarte</h3>
+        <p class="hint">Bitte erkannte Angaben vor dem Speichern prüfen.</p>
+
+        <form id="form-confirm" novalidate>
+          <div class="form-grid">
+            <label>Titel *
+              <input type="text" id="field-title" required placeholder="z. B. Jahresabrechnung Strom">
+            </label>
+            <label>Absender *
+              <input type="text" id="field-sender" required placeholder="z. B. SWU Energie GmbH">
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label>Dokumenttyp *
+              <select id="field-doc-type" required></select>
+            </label>
+            <label>Kategorie *
+              <select id="field-category" required></select>
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label>Dokumentdatum *
+              <input type="date" id="field-doc-date" required>
+            </label>
+            <label>Akten-/Vertrags-/Kundennr.
+              <input type="text" id="field-reference" placeholder="z. B. KD-44512">
+            </label>
+          </div>
+
+          <fieldset class="financial-box">
+            <legend>Zahlungs- & Fristdaten</legend>
+            <label class="checkbox-label">
+              <input type="checkbox" id="field-action-required">
+              <span>Handlungsbedarf / offene Aufgabe anlegen</span>
+            </label>
+
+            <div class="form-grid">
+              <label>Betrag (EUR)
+                <input type="number" step="0.01" min="0" max="999999.99" id="field-amount" placeholder="0.00">
+              </label>
+              <label>Fälligkeitsdatum
+                <input type="date" id="field-due-date">
+              </label>
+            </div>
+
+            <div class="form-grid">
+              <label>IBAN
+                <input type="text" id="field-iban" placeholder="DE...">
+                <small id="iban-status" class="validation-msg"></small>
+              </label>
+              <label>Verwendungszweck / Rechnungsnr.
+                <input type="text" id="field-payment-ref" placeholder="RN-2026-...">
+              </label>
+            </div>
+
+            <div class="form-grid">
+              <label>Erinnerungsdatum
+                <input type="date" id="field-reminder-date">
+              </label>
+              <label class="checkbox-label top-pad">
+                <input type="checkbox" id="field-create-calendar" checked>
+                <span>In Google Kalender eintragen</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <label>Schlagworte (Tags, kommagetrennt)
+            <input type="text" id="field-tags" placeholder="Strom, Nachzahlung, Steuer2026">
+          </label>
+
+          <label>KI-Zusammenfassung (2–3 Sätze) *
+            <textarea id="field-summary" rows="3" required></textarea>
+          </label>
+
+          <details>
+            <summary>Erkannter Volltext (Markdown)</summary>
+            <textarea id="field-fulltext" rows="6"></textarea>
+          </details>
+
+          <div id="validation-errors" class="error-box hidden"></div>
+
+          <div class="form-actions">
+            <button type="submit" id="confirm-save-btn" class="btn-primary">Speichern & Termin anlegen</button>
+            <button type="button" id="confirm-cancel-btn" class="btn-outline">Abbrechen</button>
+          </div>
         </form>
       </div>
     </section>
 
-    <section id="view-archive" class="view hidden">
-      <h2>Dokumentenarchiv (M4)</h2>
-      <input type="search" id="search-input" placeholder="Volltextsuche...">
-      <div id="archive-list"></div>
-    </section>
+    <!-- 4. EINSTELLUNGEN & EINRICHTUNG (FA-101 bis FA-106, FA-901, FA-902) -->
+    <section id="view-settings" class="view hidden">
+      <h2>Einrichtung & Einstellungen</h2>
 
-    <section id="view-tasks" class="view hidden">
-      <h2>Offene Fristen (M5)</h2>
-      <div id="tasks-list"></div>
+      <div class="setup-steps">
+        <span class="step-pill">1. Google-Login</span>
+        <span class="step-pill">2. KI-Schlüssel</span>
+        <span class="step-pill">3. Drive-Ordner</span>
+      </div>
+
+      <form id="form-settings">
+        <label>Google OAuth Client-ID
+          <input type="text" id="setting-client-id" placeholder="...apps.googleusercontent.com" required>
+          <small>Benötigt Scopes: <code>drive.file</code>, <code>drive.appdata</code>, <code>calendar.events</code></small>
+        </label>
+
+        <label>Gemini API-Schlüssel (aus Google AI Studio)
+          <div class="inline-input">
+            <input type="password" id="setting-api-key" placeholder="AIzaSy..." required>
+            <button type="button" id="btn-test-key" class="btn-outline">Prüfen</button>
+          </div>
+        </label>
+
+        <div class="form-grid">
+          <label>Gemini-Modellname (FA-901)
+            <input type="text" id="setting-model" value="gemini-2.5-flash">
+          </label>
+          <label>Erinnerungsvorlauf (Tage vor Frist)
+            <input type="number" id="setting-lead-days" min="0" max="30" value="3">
+          </label>
+        </div>
+
+        <div class="form-grid">
+          <label>Standardkategorie
+            <select id="setting-default-category"></select>
+          </label>
+          <label>Darstellung
+            <select id="setting-theme">
+              <option value="system">Systemstandard</option>
+              <option value="light">Hell</option>
+              <option value="dark">Dunkel</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="privacy-box">
+          <label class="checkbox-label">
+            <input type="checkbox" id="setting-privacy-consent" required>
+            <span><strong>Datenschutzhinweis (FA-304):</strong> Mir ist bekannt, dass Dokumente zur Analyse an die Gemini-API gesendet werden und im kostenlosen Tarif von Google zur Produktverbesserung genutzt werden können.</span>
+          </label>
+        </div>
+
+        <button type="submit" id="save-settings-btn" class="btn-primary">Einstellungen speichern</button>
+      </form>
+
+      <hr>
+
+      <div class="settings-actions">
+        <h3>Konto & Mehrgeräte-Synchronisation</h3>
+        <div class="button-row">
+          <button id="btn-rebuild-index" class="btn-outline" type="button">🔄 Index aus Drive neu aufbauen</button>
+          <button id="btn-open-drive-root" class="btn-outline" type="button">📂 Archivordner in Drive öffnen</button>
+        </div>
+        <div class="button-row">
+          <button id="btn-logout" class="btn-outline" type="button">Abmelden</button>
+          <button id="btn-revoke" class="btn-danger" type="button">Verbindung trennen (Widerrufen)</button>
+        </div>
+        <p id="index-progress-msg" class="hint"></p>
+      </div>
     </section>
   </main>
 
-  <script src="js/validation.js"></script>
-  <script src="js/db.js"></script>
-  <script src="js/pdf.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/drive.js"></script>
-  <script src="js/calendar.js"></script>
-  <script src="js/gemini.js"></script>
-  <script src="app.js"></script>
+  <!-- DOKUMENT-DETAIL MODAL (FA-602) -->
+  <div id="doc-detail-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="detail-title">Dokumentdetails</h3>
+        <button id="btn-close-modal" class="btn-close" type="button">✕</button>
+      </div>
+      <div id="detail-body"></div>
+      <div class="modal-footer">
+        <a id="detail-drive-link" href="#" target="_blank" rel="noopener" class="btn-primary">In Drive öffnen</a>
+        <a id="detail-cal-fallback" href="#" target="_blank" rel="noopener" class="btn-outline hidden">📅 Zu Kalender hinzufügen</a>
+        <button id="btn-toggle-status" class="btn-outline" type="button">Als erledigt markieren</button>
+        <button id="btn-delete-doc" class="btn-danger" type="button">Löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNTERE NAVIGATION (Kapitel 9: Archiv, Aufgaben, Scannen zentral, Einstellungen) -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-view="archive" type="button">
+      <span>🗂️</span><small>Archiv</small>
+    </button>
+    <button class="nav-btn" data-view="tasks" type="button">
+      <span>⏰</span><small>Aufgaben</small>
+    </button>
+    <button class="nav-btn scan-fab" data-view="scan" type="button">
+      <span>➕</span><small>Scannen</small>
+    </button>
+    <button class="nav-btn" data-view="settings" type="button">
+      <span>⚙️</span><small>Einstellungen</small>
+    </button>
+  </nav>
+
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
