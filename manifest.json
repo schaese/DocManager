@@ -3,7 +3,7 @@
   "short_name": "DokArchiv",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#f8f9fa",
   "theme_color": "#1a73e8",
   "icons": [
     {
@@ -16,5 +16,14 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "./index.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
