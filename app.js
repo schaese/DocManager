@@ -259,40 +259,63 @@ function resetScanState() {
 }
 
 async function handleIncomingFiles(files) {
-  const first = files[0];
-  // Duplikatprüfung (FA-206)
-  currentSourceHash = await hashFile(first);
-  const dup = await findBySourceHash(currentSourceHash);
-  const dupWarn = document.getElementById('duplicate-warning');
-  if (dup) {
-    dupWarn.innerHTML = `⚠️ <strong>Bereits archiviert:</strong> „${dup.title}“ vom ${dup.docDate || '-'}.`;
-    dupWarn.classList.remove('hidden');
-  } else {
-    dupWarn.classList.add('hidden');
-  }
+  const statusBox = document.getElementById('analysis-status');
+  const stepText = document.getElementById('analysis-step-text');
 
-  if (first.type === 'application/pdf') {
-    if (first.size > 15 * 1024 * 1024) {
-      return alert('PDF ist größer als 15 MB (FA-203).');
-    }
-    uploadedPdfFile = first;
-    capturedPages = [];
-    await runAiExtraction();
-    return;
-  }
+  try {
+    const first = files[0];
+    if (!first) return;
 
-  uploadedPdfFile = null;
-  for (const f of files) {
-    if (!f.type.startsWith('image/')) continue;
-    if (capturedPages.length >= 10) {
-      alert('Maximal 10 Seiten pro Dokument erlaubt (FA-201).');
-      break;
+    statusBox.classList.remove('hidden');
+    stepText.textContent = 'Datei wird geladen und geprüft...';
+
+    // Duplikatprüfung (FA-206)
+    currentSourceHash = await hashFile(first);
+    const dup = await findBySourceHash(currentSourceHash);
+    const dupWarn = document.getElementById('duplicate-warning');
+    if (dup) {
+      dupWarn.innerHTML = `⚠️ <strong>Bereits archiviert:</strong> „${dup.title}“ vom ${dup.docDate || '-'}.`;
+      dupWarn.classList.remove('hidden');
+    } else {
+      dupWarn.classList.add('hidden');
     }
-    const optimized = await optimizeImageFile(f, 0, false);
-    capturedPages.push({ rawFile: f, rotation: 0, bw: false, ...optimized });
+
+    const isPdf = first.type === 'application/pdf' || /\.pdf$/i.test(first.name);
+    if (isPdf) {
+      if (first.size > 15 * 1024 * 1024) {
+        statusBox.classList.add('hidden');
+        return alert('PDF ist größer als 15 MB (FA-203).');
+      }
+      uploadedPdfFile = first;
+      capturedPages = [];
+      await runAiExtraction();
+      return;
+    }
+
+    uploadedPdfFile = null;
+    for (const f of files) {
+      const isImage = f.type.startsWith('image/') || /\.(jpe?g|png|webp)$/i.test(f.name);
+      if (!isImage) continue;
+      if (capturedPages.length >= 10) {
+        alert('Maximal 10 Seiten pro Dokument erlaubt (FA-201).');
+        break;
+      }
+      stepText.textContent = 'Foto wird für KI-Analyse optimiert...';
+      const optimized = await optimizeImageFile(f, 0, false);
+      capturedPages.push({ rawFile: f, rotation: 0, bw: false, ...optimized });
+    }
+
+    statusBox.classList.add('hidden');
+    renderPagesGrid();
+
+    // Automatisch zur Seitenvorschau und dem Button "KI-Analyse starten" scrollen
+    document.getElementById('pages-panel').scrollIntoView({ behavior: 'smooth' });
+  } catch (err) {
+    statusBox.classList.add('hidden');
+    alert('Fehler beim Laden des Bildes: ' + err.message);
   }
-  renderPagesGrid();
 }
+
 
 function renderPagesGrid() {
   const panel = document.getElementById('pages-panel');
