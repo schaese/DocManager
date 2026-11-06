@@ -1,8 +1,24 @@
+function loadImageFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Bilddatei konnte nicht geladen werden.'));
+    };
+    img.src = url;
+  });
+}
+
 export async function optimizeImageFile(file, rotationDeg = 0, bwFilter = false) {
-  const bitmap = await createImageBitmap(file);
+  const img = await loadImageFromFile(file);
   const maxEdge = 2000;
-  let width = bitmap.width;
-  let height = bitmap.height;
+  let width = img.naturalWidth || img.width;
+  let height = img.naturalHeight || img.height;
 
   if (width > maxEdge || height > maxEdge) {
     if (width >= height) {
@@ -26,14 +42,12 @@ export async function optimizeImageFile(file, rotationDeg = 0, bwFilter = false)
 
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.rotate((rotationDeg * Math.PI) / 180);
-  ctx.drawImage(bitmap, -width / 2, -height / 2, width, height);
+  ctx.drawImage(img, -width / 2, -height / 2, width, height);
 
   const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-  const blob = await (await fetch(dataUrl)).blob();
 
   return {
     dataUrl,
-    blob,
     width: canvas.width,
     height: canvas.height
   };
